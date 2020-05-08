@@ -2,15 +2,15 @@ package Redis
 
 import "github.com/tidwall/redcon"
 
-func Del(conn redcon.Conn, cmd redcon.Command) bool {
+func (i *Instance) Del(conn redcon.Conn, cmd redcon.Command) bool {
 	if len(cmd.Args) != 2 {
 		conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 		return true
 	}
-	mu.Lock()
-	_, ok := items[string(cmd.Args[1])]
-	delete(items, string(cmd.Args[1]))
-	mu.Unlock()
+	i.Lock()
+	_, ok := i.data[string(cmd.Args[1])]
+	delete(i.data, string(cmd.Args[1]))
+	i.Unlock()
 	if !ok {
 		conn.WriteInt(0)
 	} else {
@@ -19,14 +19,14 @@ func Del(conn redcon.Conn, cmd redcon.Command) bool {
 	return false
 }
 
-func Get(conn redcon.Conn, cmd redcon.Command) bool {
+func (i *Instance) Get(conn redcon.Conn, cmd redcon.Command) bool {
 	if len(cmd.Args) != 2 {
 		conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 		return true
 	}
-	mu.RLock()
-	val, ok := items[string(cmd.Args[1])]
-	mu.RUnlock()
+	i.Lock()
+	val, ok := i.data[string(cmd.Args[1])]
+	i.Unlock()
 	if !ok {
 		conn.WriteNull()
 	} else {
@@ -35,14 +35,14 @@ func Get(conn redcon.Conn, cmd redcon.Command) bool {
 	return false
 }
 
-func Set(conn redcon.Conn, cmd redcon.Command) bool {
+func (i *Instance) Set(conn redcon.Conn, cmd redcon.Command) bool {
 	if len(cmd.Args) != 3 {
 		conn.WriteError("ERR wrong number of arguments for '" + string(cmd.Args[0]) + "' command")
 		return true
 	}
-	mu.Lock()
-	items[string(cmd.Args[1])] = cmd.Args[2]
-	mu.Unlock()
+	i.Lock()
+	i.data[string(cmd.Args[1])] = cmd.Args[2]
+	i.Unlock()
 	conn.WriteString("OK")
 	return false
 }
