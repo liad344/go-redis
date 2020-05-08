@@ -16,6 +16,10 @@ func handleConnection(conn redcon.Conn) bool {
 }
 
 func handleCommands(conn redcon.Conn, cmd redcon.Command) {
+	go handle(conn, cmd)
+}
+
+func handle(conn redcon.Conn, cmd redcon.Command) {
 	switch strings.ToLower(string(cmd.Args[0])) {
 	default:
 		conn.WriteError("ERR unknown command '" + string(cmd.Args[0]) + "'")
