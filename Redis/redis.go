@@ -1,6 +1,8 @@
 package redis
 
-import "sync"
+import (
+	"sync"
+)
 
 type Instance struct {
 	data map[string][]byte

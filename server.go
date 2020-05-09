@@ -24,11 +24,12 @@ type Server struct {
 
 func (s *Server) Start(){
 	s.Init()
-	go s.ServeHTTP()
-	log.Info("Serving redis clone")
+	s.ServeHTTP()
 }
 func (s *Server) ServeHTTP() {
-	if err := redcon.ListenAndServe(s.cfg.addr , s.mux.ServeRESP , s.accept , s.closed); err != nil {
+	log.Info("Serving redis clone")
+
+	if err := redcon.ListenAndServe(":8000" , s.mux.ServeRESP , s.accept , s.closed); err != nil {
 		log.Error("Could not start http server")
 	}
 }
@@ -38,8 +39,9 @@ func (s *Server) Init(){
 	s.accept = onNewConnection
 	s.closed = onConnectionClosed
 	s.mux.HandleFunc("set" , s.ins.Set)
-	s.mux.HandleFunc("Get" , s.ins.Get)
-	s.mux.HandleFunc("Del" , s.ins.Del)
+	s.mux.HandleFunc("get" , s.ins.Get)
+	s.mux.HandleFunc("del" , s.ins.Del)
+	s.mux.HandleFunc("ping" , s.ins.Ping)
 }
 
 func NewServer() *Server{
